@@ -6,6 +6,9 @@
 name: Publish Docker image
 
 on:
+  push:
+    branches:
+      - rest-api
   release:
     types: [published]
 
@@ -35,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
         with:
-          images: blockscout/blockscout
+          images: ankrnetwork/blockscout
       
       - name: Build & Push Docker image
-        run: docker buildx build -t blockscout/blockscout:latest -t blockscout/blockscout:${{ env.RELEASE_VERSION }} -f ./docker/Dockerfile --push --platform=linux/arm64,linux/amd64 .
+        run: docker buildx build -t ankrnetwork/blockscout:rest-api -f ./docker/Dockerfile --push --platform=linux/arm64,linux/amd64 .

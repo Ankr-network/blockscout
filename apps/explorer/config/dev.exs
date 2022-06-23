@@ -1,6 +1,6 @@
 import Config
 
-database = if System.get_env("DATABASE_URL"), do: nil, else: "explorer_dev"
+database = if System.get_env("DATABASE_URL"), do: nil, else: "blockscout"
 hostname = if System.get_env("DATABASE_URL"), do: nil, else: "localhost"
 
 database_api_url =

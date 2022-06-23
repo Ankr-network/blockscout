@@ -4,7 +4,27 @@ defmodule BlockScoutWeb.API.RPC.TransactionController do
   import BlockScoutWeb.Chain, only: [paging_options: 1, next_page_params: 3, split_list_by_page: 1]
 
   alias Explorer.Chain
+  alias Explorer.{Chain, PagingOptions}
   alias Explorer.Chain.Transaction
+
+  def gettxs(conn, params) do
+    with {:pagesize_param, {:ok, pagesize_param}} <- fetch_pagesize(params) do
+      recent_transactions =
+        Chain.recent_collated_transactions(
+          necessity_by_association: %{
+            :block => :required,
+            [created_contract_address: :names] => :optional,
+            [from_address: :names] => :optional,
+            [to_address: :names] => :optional,
+            [created_contract_address: :smart_contract] => :optional,
+            [from_address: :smart_contract] => :optional,
+            [to_address: :smart_contract] => :optional
+          },
+          paging_options: %PagingOptions{page_size: pagesize_param}
+        )
+      json(conn, %{transactions: recent_transactions})
+    end
+  end
 
   def gettxinfo(conn, params) do
     with {:txhash_param, {:ok, txhash_param}} <- fetch_txhash(params),
@@ -67,6 +87,10 @@ defmodule BlockScoutWeb.API.RPC.TransactionController do
       {:format, :error} ->
         render(conn, :error, error: "Invalid txhash format")
     end
+  end
+
+  defp fetch_pagesize(params) do
+    {:txhash_param, Map.fetch(params, "pagesize")}
   end
 
   defp fetch_txhash(params) do
